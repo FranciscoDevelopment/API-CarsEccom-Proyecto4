@@ -23,10 +23,12 @@ export type carRowT = {
   
   created_at? : Date | null ;
 
+  price : number
+
 }
 
 
-export type createCarInputI = Pick<carRowT, 'brand' | 'model_name' | 'version_name' | 'gear_count' | 'seats' | 'year' | 'engine' | 'color' | 'r8_locality' > 
+export type createCarInputI = Pick<carRowT, 'price' |'brand' | 'model_name' | 'version_name' | 'gear_count' | 'seats' | 'year' | 'engine' | 'color' | 'r8_locality' > 
 & {
   image_url? : string;
 }
