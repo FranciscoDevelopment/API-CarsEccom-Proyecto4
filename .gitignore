@@ -3,6 +3,9 @@
 /node_modules
 /build
 
+# Local AI context
+CLAUDE.md
+
 # Logs
 logs
 *.log
