@@ -1,13 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { CarsService } from './cars.service';
 import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
+import { ApiKeyGuard } from 'src/common/guards/api-key/api-key.guard';
 
 @Controller( {path: 'cars', version: '1' } )
 export class CarsController {
+
   constructor(private readonly carsService: CarsService) {}
 
   @Post()
+  //@UseGuards( ApiKeyGuard )
   create(@Body() createCarDto: CreateCarDto) {
     return this.carsService.create(createCarDto);
   }
