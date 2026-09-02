@@ -4,6 +4,7 @@ import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
 import { ApiKeyGuard } from 'src/common/guards/api-key/api-key.guard';
 
+
 @Controller( {path: 'cars', version: '1' } )
 export class CarsController {
 
@@ -11,8 +12,8 @@ export class CarsController {
 
   @Post()
   //@UseGuards( ApiKeyGuard )
-  create(@Body() createCarDto: CreateCarDto) {
-    return this.carsService.create(createCarDto);
+  async create(@Body() createCarDto: CreateCarDto) {
+    return await this.carsService.create(createCarDto);
   }
 
   @Get()
@@ -20,10 +21,58 @@ export class CarsController {
     return this.carsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.carsService.findOne(+id);
+
+  @Get( 'brand/:brand' )
+  async findCarsByBrand( @Param('brand') brand : string ) {
+    return await this.carsService.findCarsByBrand( brand ) 
   }
+
+
+  @Get( 'model/:model' )
+  async findCarsByModel( @Param('model') model : string ) {
+    return await this.carsService.findCarsByModel(model)
+  }
+
+
+  @Get( 'version/:version' )
+  async findCarsByVersion( @Param('version') version : string ) {
+
+    return await this.carsService.findCarsByVersion( version )
+
+  }
+
+
+  @Get( 'greater/:min' )
+  async findCarsByGreaterPriceThan( @Param('min') minPrice : number  ){
+
+    return await this.carsService.findCarsByGreaterPriceThan( minPrice )
+
+  }
+
+  @Get( 'lower/:max' )
+  async findCarsByLowerPriceThan( @Param('max') maxPrice : number ) {
+
+    return await this.carsService.findCarsByLowerPriceThan( maxPrice )
+
+  }
+
+
+  @Get('out-stock')
+  async findCarsWithoutStock() {
+    return this.carsService.findCarsWithoutStock() ;
+  }
+
+  @Get('available')
+  async findAvailableCars() {
+    return this.carsService.findAvailableCars() ;
+  }
+
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return await this.carsService.findOneById(+id);
+  }
+
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCarDto: UpdateCarDto) {
@@ -34,4 +83,6 @@ export class CarsController {
   remove(@Param('id') id: string) {
     return this.carsService.remove(+id);
   }
+
+
 }
