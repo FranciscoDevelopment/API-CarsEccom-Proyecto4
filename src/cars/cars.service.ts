@@ -81,6 +81,35 @@ export class CarsService {
   }
 
 
+  async findCarsWithoutStock () {
+
+    const carsOutOfStock = await this.prismaORM.cars.findMany(
+      {
+        where: {quantity: 0}
+      }
+    )
+
+    return carsOutOfStock
+
+  }
+
+
+  async findAvailableCars() {
+
+    const carsWithStock = await this.prismaORM.cars.findMany(
+      {
+        where: {quantity: {gt: 0}  }
+      }
+    )
+
+    return carsWithStock
+
+  }
+
+
+
+
+
   update(id: number, updateCarDto: UpdateCarDto) {
     return `This action updates a #${id} car`;
   }

@@ -20,10 +20,6 @@ export class CarsController {
     return this.carsService.findAll();
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return await this.carsService.findOneById(+id);
-  }
 
   @Get( 'brand/:brand' )
   async findCarsByBrand( @Param('brand') brand : string ) {
@@ -42,6 +38,17 @@ export class CarsController {
 
     return await this.carsService.findCarsByVersion( version )
 
+  }
+
+
+  @Get('out-stock')
+  async findCarsWithoutStock() {
+    return this.carsService.findCarsWithoutStock() ;
+  }
+
+  @Get('available')
+  async findAvailableCars() {
+    return this.carsService.findAvailableCars() ;
   }
 
 
