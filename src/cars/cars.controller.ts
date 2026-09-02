@@ -4,6 +4,7 @@ import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
 import { ApiKeyGuard } from 'src/common/guards/api-key/api-key.guard';
 
+
 @Controller( {path: 'cars', version: '1' } )
 export class CarsController {
 
@@ -48,6 +49,13 @@ export class CarsController {
 
   }
 
+  @Get( 'lower/:max' )
+  async findCarsByLowerPriceThan( @Param('max') maxPrice : number ) {
+
+    return await this.carsService.findCarsByLowerPriceThan( maxPrice )
+
+  }
+
 
   @Get('out-stock')
   async findCarsWithoutStock() {
@@ -75,4 +83,6 @@ export class CarsController {
   remove(@Param('id') id: string) {
     return this.carsService.remove(+id);
   }
+
+
 }

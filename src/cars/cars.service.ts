@@ -109,16 +109,28 @@ export class CarsService {
 
   async findCarsByGreaterPriceThan( minPrice : number ) {
 
-      const carsWithPriceGreaterThan = await this.prismaORM.cars.findMany(
-        {
-          where: {price: {gt: minPrice}}
-        }
-      )
+    const carsWithPriceGreaterThan = await this.prismaORM.cars.findMany(
+      {
+        where: {price: {gt: minPrice}}
+      }
+    )
 
-      return carsWithPriceGreaterThan
+    return carsWithPriceGreaterThan
 
-    }
+  }
 
+
+  async findCarsByLowerPriceThan( maxPrice : number ) {
+
+    const carsWithPriceLowerThan = await this.prismaORM.cars.findMany(
+      {
+        where: {price: {lt: maxPrice} }
+      }
+    )
+
+    return carsWithPriceLowerThan
+
+  }
 
 
   update(id: number, updateCarDto: UpdateCarDto) {
