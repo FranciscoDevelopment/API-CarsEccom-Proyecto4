@@ -11,8 +11,8 @@ export class CarsController {
 
   @Post()
   //@UseGuards( ApiKeyGuard )
-  create(@Body() createCarDto: CreateCarDto) {
-    return this.carsService.create(createCarDto);
+  async create(@Body() createCarDto: CreateCarDto) {
+    return await this.carsService.create(createCarDto);
   }
 
   @Get()
