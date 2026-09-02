@@ -41,6 +41,14 @@ export class CarsController {
   }
 
 
+  @Get( 'greater/:min' )
+  async findCarsByGreaterPriceThan( @Param('min') minPrice : number  ){
+
+    return await this.carsService.findCarsByGreaterPriceThan( minPrice )
+
+  }
+
+
   @Get('out-stock')
   async findCarsWithoutStock() {
     return this.carsService.findCarsWithoutStock() ;
@@ -49,6 +57,12 @@ export class CarsController {
   @Get('available')
   async findAvailableCars() {
     return this.carsService.findAvailableCars() ;
+  }
+
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return await this.carsService.findOneById(+id);
   }
 
 

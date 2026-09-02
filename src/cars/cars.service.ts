@@ -107,6 +107,17 @@ export class CarsService {
   }
 
 
+  async findCarsByGreaterPriceThan( minPrice : number ) {
+
+      const carsWithPriceGreaterThan = await this.prismaORM.cars.findMany(
+        {
+          where: {price: {gt: minPrice}}
+        }
+      )
+
+      return carsWithPriceGreaterThan
+
+    }
 
 
 
