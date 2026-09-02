@@ -22,7 +22,7 @@ export class CreateCarDto {
     @IsNotEmpty( {message: "The product stock inventory is required"} )
     @IsNumber( {maxDecimalPlaces: 0}, {message: "The stock inventory is not valid"} )
     @Type( () => Number )
-    inventory! : number
+    quantity! : number
 
     @IsNotEmpty( {message: "The gear count is required"} )
     @IsInt( {message: "The gear count is not valid"} )
