@@ -29,9 +29,54 @@ export class CarsService {
   }
 
 
-  async findOne(id: number) {
+  async findOneById(id: number) {
     
-    
+    const car = await this.prismaORM.cars.findUnique(
+      {
+        where: {id}
+      }
+    )
+
+    return car ;
+
+  }
+
+
+  async findCarsByBrand ( brand : string ) {
+
+    const carsByBrand = await this.prismaORM.cars.findMany(
+      {
+        where: {brand}
+      }
+    )
+
+    return carsByBrand
+
+  }
+
+
+  async findCarsByModel ( model : string ) {
+
+    const carsByModel = await this.prismaORM.cars.findMany(
+      {
+        where: {model_name: model}
+      }
+    )
+
+    return carsByModel
+
+  }
+  
+
+  async findCarsByVersion ( version : string ) {
+
+    const carsByVersion = await this.prismaORM.cars.findMany(
+      {
+        where: {version_name: version}
+      }
+    )
+
+    return carsByVersion
 
   }
 

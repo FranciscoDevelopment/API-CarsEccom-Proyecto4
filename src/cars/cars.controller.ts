@@ -21,9 +21,29 @@ export class CarsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.carsService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return await this.carsService.findOneById(+id);
   }
+
+  @Get( 'brand/:brand' )
+  async findCarsByBrand( @Param('brand') brand : string ) {
+    return await this.carsService.findCarsByBrand( brand ) 
+  }
+
+
+  @Get( 'model/:model' )
+  async findCarsByModel( @Param('model') model : string ) {
+    return await this.carsService.findCarsByModel(model)
+  }
+
+
+  @Get( 'version/:version' )
+  async findCarsByVersion( @Param('version') version : string ) {
+
+    return await this.carsService.findCarsByVersion( version )
+
+  }
+
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCarDto: UpdateCarDto) {
