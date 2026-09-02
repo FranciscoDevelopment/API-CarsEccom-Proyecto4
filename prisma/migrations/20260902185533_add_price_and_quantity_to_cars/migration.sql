@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "cars" ADD COLUMN     "price" DECIMAL(10,2) NOT NULL DEFAULT 0,
+ADD COLUMN     "quantity" INTEGER NOT NULL DEFAULT 0;
