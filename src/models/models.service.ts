@@ -25,13 +25,31 @@ export class ModelsService {
   }
 
 
-  findOne(id: number) {
-    return `This action returns a #${id} model`;
+  async findOneById(id: number) {
+    
+    const car = await this.prismaORM.models.findUnique(
+      {
+        where: {id}
+      }
+    )
+
+    return car ;
+
   }
 
-  update(id: number, updateModelDto: UpdateModelDto) {
-    return `This action updates a #${id} model`;
+  async findModelsByBrand ( brand : string ) {
+
+    const modelsByBrand = await this.prismaORM.models.findMany(
+      {
+        where: {brand: brand}
+      }
+    )
+
+    return modelsByBrand
+
   }
+
+
 
   remove(id: number) {
     return `This action removes a #${id} model`;
