@@ -39,6 +39,32 @@ export class VersionsService {
   }
 
 
+  async findVersionsByBrand ( brand : string ) {
+
+    const versionsByBrand = await this.prismaORM.versions.findMany(
+      {
+        where: {brand: brand}
+      }
+    )
+
+    return versionsByBrand
+
+  }
+
+
+  async findVersionsByModel ( model : string ) {
+
+    const modelsByBrand = await this.prismaORM.versions.findMany(
+      {
+        where: {model_name: model}
+      }
+    )
+
+    return modelsByBrand
+
+  }
+
+
   update(id: number, updateVersionDto: UpdateVersionDto) {
     return `This action updates a #${id} version`;
   }

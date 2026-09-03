@@ -17,9 +17,26 @@ export class VersionsController {
     return this.versionsService.findAll();
   }
 
+
+  @Get('brand/:brand')
+  async findVersionsByBrand( @Param('brand') brand : string ) {
+
+    return await this.versionsService.findVersionsByBrand( brand )
+
+  }
+
+
+  @Get('version/:version')
+  async findVersionsByModel( @Param('model') model : string ) {
+
+    return await this.versionsService.findVersionsByModel(model)
+
+  }
+
+
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.versionsService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return await this.versionsService.findOne(+id);
   }
 
   @Patch(':id')
