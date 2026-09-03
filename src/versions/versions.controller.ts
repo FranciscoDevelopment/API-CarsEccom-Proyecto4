@@ -3,7 +3,7 @@ import { VersionsService } from './versions.service';
 import { CreateVersionDto } from './dto/create-version.dto';
 import { UpdateVersionDto } from './dto/update-version.dto';
 
-@Controller('versions')
+@Controller({path: 'versions', version: '1'})
 export class VersionsController {
   constructor(private readonly versionsService: VersionsService) {}
 
@@ -40,12 +40,12 @@ export class VersionsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateVersionDto: UpdateVersionDto) {
-    return this.versionsService.update(+id, updateVersionDto);
+  async update(@Param('id') id: string, @Body() updateVersionDto: UpdateVersionDto) {
+    return await this.versionsService.update(+id, updateVersionDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.versionsService.remove(+id);
+  async remove(@Param('id') id: string) {
+    return await this.versionsService.remove(+id);
   }
 }

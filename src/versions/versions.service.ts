@@ -65,13 +65,24 @@ export class VersionsService {
   }
 
 
-  update(id: number, updateVersionDto: UpdateVersionDto) {
-    return `This action updates a #${id} version`;
+  async update(id: number, updateVersionDto: UpdateVersionDto) {
+    
+    return await this.prismaORM.versions.update(
+      {
+        where: {id},
+        data: updateVersionDto
+      }
+    )
+
   }
 
 
-  remove(id: number) {
-    return `This action removes a #${id} version`;
+  async remove(id: number) {
+    return await this.prismaORM.versions.delete(
+      {
+        where: {id}
+      }
+    )
   }
 
 }
