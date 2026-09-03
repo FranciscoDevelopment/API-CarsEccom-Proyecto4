@@ -3,7 +3,7 @@ import { ModelsService } from './models.service';
 import { CreateModelDto } from './dto/create-model.dto';
 import { UpdateModelDto } from './dto/update-model.dto';
 
-@Controller('models')
+@Controller({path: 'models', version: '1'})
 export class ModelsController {
 
   constructor(private readonly modelsService: ModelsService) {}

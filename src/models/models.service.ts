@@ -60,8 +60,12 @@ export class ModelsService {
   
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} model`;
+  async remove(id: number) {
+    return this.prismaORM.models.delete(
+      {
+        where: {id},
+      }
+    ) 
   }
 
   
