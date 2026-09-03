@@ -1,16 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { CreateModelDto } from './dto/create-model.dto';
 import { UpdateModelDto } from './dto/update-model.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class ModelsService {
+
+  constructor( private readonly prismaORM : PrismaService ) {}
+
   create(createModelDto: CreateModelDto) {
-    return 'This action adds a new model';
+    
+    return this.prismaORM.models.create(
+      {
+        data: createModelDto,
+        select: {name: true, brand: true}
+      }
+    )
+
   }
 
-  findAll() {
-    return `This action returns all models`;
+
+  async findAll() {
+    return await this.prismaORM.models.findMany()  
   }
+
 
   findOne(id: number) {
     return `This action returns a #${id} model`;
