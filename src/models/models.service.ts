@@ -29,7 +29,8 @@ export class ModelsService {
     
     const car = await this.prismaORM.models.findUnique(
       {
-        where: {id}
+        where: {id},
+        include: {versionsByModelId: true}
       }
     )
 
@@ -41,7 +42,9 @@ export class ModelsService {
 
     const modelsByBrand = await this.prismaORM.models.findMany(
       {
-        where: {brand: brand}
+        where: {brand: brand},
+        include: {versionsByModelName: true}
+
       }
     )
 

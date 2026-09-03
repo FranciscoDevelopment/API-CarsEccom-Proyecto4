@@ -34,8 +34,8 @@ model models {
   name                                 String     @unique @db.VarChar(100)
   brand                                String?    @db.VarChar(255)
   cars                                 cars[]
-  versions_versions_model_idTomodels   versions[] @relation("versions_model_idTomodels")
-  versions_versions_model_nameTomodels versions[] @relation("versions_model_nameTomodels")
+  versionsByModelId                    versions[] @relation("versions_model_idTomodels")
+  versionsByModelName                  versions[] @relation("versions_model_nameTomodels")
 }
 
 model project_description {
@@ -68,8 +68,8 @@ model versions {
   name                               String  @db.VarChar(80)
   brand                              String? @db.VarChar(255)
   cars                               cars[]
-  models_versions_model_idTomodels   models  @relation("versions_model_idTomodels", fields: [model_id], references: [id])
-  models_versions_model_nameTomodels models  @relation("versions_model_nameTomodels", fields: [model_name], references: [name])
+  modelByVersionId                   models  @relation("versions_model_idTomodels", fields: [model_id], references: [id])
+  modelByVersionName                 models  @relation("versions_model_nameTomodels", fields: [model_name], references: [name])
 
   @@unique([model_id, name], map: "versions_unique_per_model_id")
   @@unique([model_name, name], map: "versions_unique_per_model_name")
