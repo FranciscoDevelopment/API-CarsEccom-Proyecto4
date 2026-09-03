@@ -49,7 +49,16 @@ export class ModelsService {
 
   }
 
-
+  async update(id: number, updateModelDto: UpdateModelDto) {
+    
+    return await this.prismaORM.models.update(
+      {
+        where: {id},
+        data: updateModelDto
+      }
+    )
+  
+  }
 
   remove(id: number) {
     return `This action removes a #${id} model`;
