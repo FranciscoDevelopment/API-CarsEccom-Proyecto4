@@ -29,20 +29,20 @@ export class ModelsController {
 
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.modelsService.findOneById(+id);
+  async findOne(@Param('id') id: string) {
+    return await this.modelsService.findOneById(+id);
   }
 
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateModelDto: UpdateModelDto) {
-    return this.modelsService.update(+id, updateModelDto);
+  async update(@Param('id') id: string, @Body() updateModelDto: UpdateModelDto) {
+    return await this.modelsService.update(+id, updateModelDto);
   }
 
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.modelsService.remove(+id);
+  async remove(@Param('id') id: string) {
+    return await this.modelsService.remove(+id);
   }
 
 
