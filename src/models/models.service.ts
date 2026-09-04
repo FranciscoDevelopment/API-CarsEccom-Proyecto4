@@ -21,7 +21,13 @@ export class ModelsService {
 
 
   async findAll() {
-    return await this.prismaORM.models.findMany()  
+    return await this.prismaORM.models.findMany({
+      select: {
+        name: true,
+        versionsByModelName: true,
+        _count: {select: {cars: true}}
+      }
+    })  
   }
 
 
@@ -43,9 +49,10 @@ export class ModelsService {
     const modelsByBrand = await this.prismaORM.models.findMany(
       {
         where: {brand: brand},
-        include: {versionsByModelName: true}
-
-      }
+        include: {versionsByModelName: true},
+        orderBy: {id: "asc"}
+      },
+      
     )
 
     return modelsByBrand
