@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateVersionDto } from './dto/create-version.dto';
 import { UpdateVersionDto } from './dto/update-version.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { version } from 'node:os';
 
 @Injectable()
 export class VersionsService {
@@ -110,11 +111,32 @@ export class VersionsService {
 
 
   async remove(id: number) {
-    return await this.prismaORM.versions.delete(
-      {
+
+    return this.prismaORM.$transaction( async (tx) => {
+
+      const version = await tx.versions.findFirstOrThrow(
+        {
+          where: {id}
+        }
+      )
+
+
+      await tx.cars.deleteMany(
+        {
+          where: {
+            model_name: version.model_name,
+            version_name: version.name
+          }
+        }
+      )
+
+
+      return tx.versions.delete({
         where: {id}
-      }
-    )
+      })
+
+    } )
+
   }
 
 }
