@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateModelDto } from './dto/create-model.dto';
 import { UpdateModelDto } from './dto/update-model.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -71,11 +71,76 @@ export class ModelsService {
   }
 
   async remove(id: number) {
-    return this.prismaORM.models.delete(
-      {
-        where: {id},
+
+    const errors : string[] = []
+
+    const transaction$ = this.prismaORM.$transaction( async ( tx ) => {
+
+      const model = await tx.versions.findFirstOrThrow(
+        {
+          where: {id}
+        }
+      )
+
+
+      const carsCount = await tx.cars.count(
+        {
+          where: {
+            model_name: model.name,
+          }
+        }
+      )
+
+      if( carsCount > 1 ) {
+
+        errors.push(`Model '${model.name}' has more than 1 unit in stock and can't be deleted directly`)
+
+        throw new ConflictException( errors )
+
       }
-    ) 
+
+
+      const stock = await tx.cars.aggregate(
+
+        {
+          where: {
+            model_name: model.name
+          },
+          _sum: {quantity: true}
+        }
+
+      )
+
+      const totalUnitsInStock = stock._sum.quantity ?? 0 ;
+      
+      if(totalUnitsInStock > 1) {
+
+        errors.push(`Model '${model.name}' has more than 1 unit in stock and can't be deleted directly`)
+
+        throw new ConflictException(errors)
+      }
+
+
+      await tx.cars.deleteMany(
+        {
+          where: {
+            model_name: model.name
+          }
+        }
+      )
+
+
+      return tx.models.delete(
+        {
+          where: {id}
+        }
+      )
+
+    } )
+
+
+    return transaction$
+
   }
 
   
