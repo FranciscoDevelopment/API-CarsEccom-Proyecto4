@@ -27,6 +27,36 @@ export class VersionsService {
   
   }
 
+  
+  async findWithPagination( page : number, pageSize : number ) {
+
+    return await this.prismaORM.versions.findMany(
+      {
+        skip: (page - 1) * pageSize,
+
+        take: pageSize,
+
+        orderBy: {id: 'asc'}
+      }
+    )
+
+  }
+
+
+  async findAllVersionsWithCarsCounter () {
+
+    return await this.prismaORM.versions.findMany({
+
+      select: {
+        name: true,
+        model_name: true,
+        _count: {select: {cars: true } }
+      }
+
+    }) ;
+
+  }
+
 
   async findOne(id: number) {
   
@@ -43,7 +73,8 @@ export class VersionsService {
 
     const versionsByBrand = await this.prismaORM.versions.findMany(
       {
-        where: {brand: brand}
+        where: {brand: brand},
+        orderBy: {id: "asc"}
       }
     )
 
@@ -56,7 +87,8 @@ export class VersionsService {
 
     const modelsByBrand = await this.prismaORM.versions.findMany(
       {
-        where: {model_name: model}
+        where: {model_name: model},
+        orderBy: {id: "asc"}
       }
     )
 
