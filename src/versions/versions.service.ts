@@ -133,7 +133,6 @@ export class VersionsService {
         }
       )
 
-
       if( carsCount > 1 ) {
 
         errors.push(`Version '${version.name}' has more than 1 unit in stock and can't be deleted directly` )
@@ -152,7 +151,6 @@ export class VersionsService {
           _sum: {quantity: true}
         }
       )
-
 
       const totalUnits = stock._sum.quantity ?? 0 ;
 
