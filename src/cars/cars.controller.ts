@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { CarsService } from './cars.service';
 import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
 import { ApiKeyGuard } from 'src/common/guards/api-key/api-key.guard';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 
 @Controller( {path: 'cars', version: '1' } )
@@ -17,6 +18,11 @@ export class CarsController {
   }
 
   @Get()
+  async findWithPagination( @Query() pagination : PaginationQueryDto ) {
+    return await this.carsService.findWithPagination( pagination.page, pagination.pageSize )
+  }
+
+  @Get('all')
   findAll() {
     return this.carsService.findAll();
   }
@@ -77,6 +83,11 @@ export class CarsController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCarDto: UpdateCarDto) {
     return this.carsService.update(+id, updateCarDto);
+  }
+
+  @Delete('version/:version')
+  removeCarsWithOutStock( @Param('version') version : string ) {
+    return this.carsService.removeCarsWithOutStock(version)
   }
 
   @Delete(':id')

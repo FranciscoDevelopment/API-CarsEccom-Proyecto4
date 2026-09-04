@@ -29,6 +29,20 @@ export class CarsService {
   }
 
 
+  async findWithPagination( page : number, pageSize : number ) {
+
+    return await this.prismaORM.cars.findMany(
+      {
+        skip: (page - 1) * pageSize,
+        
+        take: pageSize,
+
+        orderBy: {id: 'asc'}
+      }
+    )
+
+  }
+
   async findOneById(id: number) {
     
     const car = await this.prismaORM.cars.findUnique(
@@ -134,12 +148,34 @@ export class CarsService {
 
 
   update(id: number, updateCarDto: UpdateCarDto) {
-    return `This action updates a #${id} car`;
+    return this.prismaORM.cars.update(
+      {
+        where: {id},
+        data: updateCarDto
+      }
+    )
   }
 
 
   remove(id: number) {
-    return `This action removes a #${id} car`;
+    return this.prismaORM.cars.delete(
+      {
+        where: {id}
+      }
+    )
+  }
+
+  removeCarsWithOutStock( version : string ) {
+
+    return this.prismaORM.cars.deleteMany(
+      {
+        where: {
+          version_name: version ,
+          quantity: 0
+        }
+      }
+    )
+
   }
 
 
