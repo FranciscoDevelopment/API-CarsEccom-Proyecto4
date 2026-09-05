@@ -38,3 +38,6 @@ export type carT = Omit< carRowT, "created_at" | "image_url" > & {
   image_url? : string
 
 }
+
+
+export type carVerificationT = Pick<carT, 'brand' | 'model_name' | 'version_name' | 'color' | 'engine' | 'gear_count' | 'year' > ;

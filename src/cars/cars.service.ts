@@ -2,18 +2,35 @@ import { Injectable } from '@nestjs/common';
 import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { carRowT, carT, createCarInputI } from './types/car.types';
+import { carRowT, carT, carVerificationT, createCarInputI } from './types/car.types';
 
 @Injectable()
 export class CarsService {
 
-  constructor(
-    private readonly prismaORM : PrismaService
-  ) {}
+  constructor(private readonly prismaORM : PrismaService ) {}
 
 
   async create(createCarDto: CreateCarDto) {
     
+    const existingCar = await this.prismaORM.cars.findFirst({
+      where: createCarDto as carVerificationT,
+    })
+
+    if (existingCar) {
+
+      return this.prismaORM.cars.update(
+        {
+          where: {id: existingCar.id},
+          
+          data: {quantity: {increment: 1} },
+          
+          select: {brand: true, model_name: true, version_name: true, quantity: true}
+        }
+      )
+    }
+
+
+
     return this.prismaORM.cars.create(
       {
         data: createCarDto,
@@ -165,6 +182,7 @@ export class CarsService {
     )
   }
 
+  
   removeCarsWithOutStock( version : string ) {
 
     return this.prismaORM.cars.deleteMany(
@@ -177,7 +195,6 @@ export class CarsService {
     )
 
   }
-
 
 }
 
