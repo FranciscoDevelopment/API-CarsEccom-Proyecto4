@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -28,7 +28,21 @@ export class CarsService {
         }
       )
     }
+  
+    
+    const modelAvailable = await this.prismaORM.models.findUnique( {
+      where: {name: createCarDto.model_name}
+    } )
 
+    if( !modelAvailable ) {
+
+      let errors : string[] = [] ;
+
+      errors.push( "The car model is not registered or available" )
+
+      throw new NotFoundException( errors ) 
+
+    }
 
 
     return this.prismaORM.cars.create(
