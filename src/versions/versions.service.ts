@@ -3,6 +3,7 @@ import { CreateVersionDto } from './dto/create-version.dto';
 import { UpdateVersionDto } from './dto/update-version.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { version } from 'node:os';
+import { versionRowT, versionVerificationT } from './types/version.type';
 
 @Injectable()
 export class VersionsService {
@@ -11,8 +12,24 @@ export class VersionsService {
 
   
 
-  create(createVersionDto: CreateVersionDto) {
+  async create(createVersionDto: CreateVersionDto) {
     
+    const existingVersion = await this.prismaORM.versions.findFirst(
+      {
+        where: createVersionDto as versionVerificationT
+      }
+    )
+
+    if( existingVersion ) {
+      let errors: string[] = [];
+
+      errors.push(`Version "${createVersionDto.name}" already exists for model "${createVersionDto.model_name}"`);
+
+      throw new ConflictException(errors);
+    }
+
+
+
     return this.prismaORM.versions.create(
       {
         data: createVersionDto,
