@@ -45,6 +45,28 @@ export class CarsService {
     }
 
 
+    const versionAvailable = await this.prismaORM.versions.findUnique(
+      {
+        where: {
+          model_name_name: {
+            model_name: createCarDto.model_name,
+            name: createCarDto.version_name
+          }
+        }
+      }
+    )
+
+    if( !versionAvailable ) {
+
+      let errors : string[] = [] ;
+
+      errors.push( "The car version is not registered or available" )
+
+      throw new NotFoundException( errors ) 
+
+    }
+
+
     return this.prismaORM.cars.create(
       {
         data: createCarDto,
@@ -178,7 +200,63 @@ export class CarsService {
   }
 
 
-  update(id: number, updateCarDto: UpdateCarDto) {
+  async update(id: number, updateCarDto: UpdateCarDto) {
+
+    const existingCar = await this.prismaORM.cars.findFirst({
+      where: updateCarDto as carVerificationT,
+    })
+
+    if (existingCar) {
+
+      return this.prismaORM.cars.update(
+        {
+          where: {id: existingCar.id},
+          
+          data: {quantity: {increment: 1} },
+          
+          select: {brand: true, model_name: true, version_name: true, quantity: true}
+        }
+      )
+    }
+  
+    
+    const modelAvailable = await this.prismaORM.models.findUnique( {
+      where: {name: updateCarDto.model_name}
+    } )
+
+    if( !modelAvailable ) {
+
+      let errors : string[] = [] ;
+
+      errors.push( "The car model is not registered or available" )
+
+      throw new NotFoundException( errors ) 
+
+    }
+
+
+    const versionAvailable = await this.prismaORM.versions.findUnique(
+      {
+        where: {
+          model_name_name: {
+            model_name: updateCarDto.model_name!,
+            name: updateCarDto.version_name!
+          }
+        }
+      }
+    )
+
+    if( !versionAvailable ) {
+
+      let errors : string[] = [] ;
+
+      errors.push( "The car version is not registered or available" )
+
+      throw new NotFoundException( errors ) 
+
+    }
+
+
     return this.prismaORM.cars.update(
       {
         where: {id},
