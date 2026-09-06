@@ -8,8 +8,23 @@ export class ModelsService {
 
   constructor( private readonly prismaORM : PrismaService ) {}
 
-  create(createModelDto: CreateModelDto) {
+  async create(createModelDto: CreateModelDto) {
     
+    const existingModel = await this.prismaORM.models.findUnique(
+      {
+        where: {name: createModelDto.name}
+      }
+    )
+
+    if( existingModel ) {
+      let errors : string[] = [] ;
+
+      errors.push( `Model "${createModelDto.name}" already exists` )
+
+      throw new ConflictException(errors)
+    }
+
+
     return this.prismaORM.models.create(
       {
         data: createModelDto,
