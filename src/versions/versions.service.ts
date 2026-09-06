@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateVersionDto } from './dto/create-version.dto';
 import { UpdateVersionDto } from './dto/update-version.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -28,6 +28,20 @@ export class VersionsService {
       throw new ConflictException(errors);
     }
 
+
+    const modelAvailable = await this.prismaORM.models.findUnique( {
+      where: {name: createVersionDto.model_name}
+    } )
+
+    if( !modelAvailable ) {
+
+      let errors : string[] = [] ;
+
+      errors.push( "The car model is not registered or available" )
+
+      throw new NotFoundException( errors ) 
+
+    }
 
 
     return this.prismaORM.versions.create(
@@ -117,13 +131,110 @@ export class VersionsService {
 
 
   async update(id: number, updateVersionDto: UpdateVersionDto) {
+
+    const errors : string[] = []
+
     
-    return await this.prismaORM.versions.update(
+    const existingVersion = await this.prismaORM.versions.findFirst(
       {
-        where: {id},
-        data: updateVersionDto
+        where: updateVersionDto as versionVerificationT
       }
     )
+
+    if( existingVersion ) {
+      let errors: string[] = [];
+
+      errors.push(`Version "${updateVersionDto.name}" already exists for model "${updateVersionDto.model_name}"`);
+
+      throw new ConflictException(errors);
+    }
+
+
+    const modelAvailable = await this.prismaORM.models.findUnique( {
+      where: {name: updateVersionDto.model_name}
+    } )
+
+    if( !modelAvailable ) {
+
+      let errors : string[] = [] ;
+
+      errors.push( "The car model is not registered or available" )
+
+      throw new NotFoundException( errors ) 
+
+    }
+
+
+    const transaction$ = this.prismaORM.$transaction( async (tx) => {
+
+      const version = await tx.versions.findFirstOrThrow(
+        {
+          where: {id}
+        }
+      )
+      
+
+      const carsCount = await tx.cars.count(
+        {
+          where: {
+            model_name: version.model_name,
+            version_name: version.name
+          }
+        }
+      )
+
+      if( carsCount > 1 ) {
+
+        errors.push(`Version '${version.name}' has more than 1 unit in stock and can't be deleted directly` )
+
+        throw new ConflictException( errors )
+
+      }
+
+
+      const stock = await tx.cars.aggregate(
+        {
+          where: {
+            model_name: version.model_name,
+            version_name: version.name
+          },
+          _sum: {quantity: true}
+        }
+      )
+
+      const totalUnits = stock._sum.quantity ?? 0 ;
+
+      if( totalUnits > 1 ){
+
+        errors.push(  `Version '${version.name}' has more than 1 unit in stock and can't be deleted` )
+
+        throw new ConflictException( errors )
+
+      }
+
+
+      await tx.cars.deleteMany(
+        {
+          where: {
+            model_name: version.model_name,
+            version_name: version.name,
+          }
+        }
+      )
+
+
+      return tx.versions.update(
+        {
+          where: {id},
+          data: updateVersionDto
+        }
+      )
+
+    } )
+
+
+    return transaction$
+
 
   }
 
