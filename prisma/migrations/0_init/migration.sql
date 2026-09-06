@@ -1,6 +1,9 @@
 -- CreateSchema
 CREATE SCHEMA IF NOT EXISTS "public";
 
+-- CreateEnum
+CREATE TYPE "public"."Role" AS ENUM ('USER', 'ADMIN', 'MODERATOR');
+
 -- CreateTable
 CREATE TABLE "public"."cars" (
     "id" SERIAL NOT NULL,

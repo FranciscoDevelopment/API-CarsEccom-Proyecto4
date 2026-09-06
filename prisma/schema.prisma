@@ -9,7 +9,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model cars {
+enum Role {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+
+model User {
+
+  id                        String      @id @default(uuid())
+  email                     String      @unique
+  password                  String
+  name                      String
+  role                      Role        @default(USER)
+
+  hashedRefreshToken        String?
+
+  cars                      Cars[]
+
+  createdAt                 DateTime    @default( now() )
+  updateAt                  DateTime    @updatedAt
+
+  @@map("users")
+}
+
+
+
+
+model Cars {
   id             Int             @id @default(autoincrement())
   brand          String          @db.VarChar(50)
   model_name     String          @db.VarChar(100)
@@ -23,19 +51,25 @@ model cars {
   color          String?         @db.VarChar(50)
   image_url      String?         @default("")
   created_at     DateTime?       @default(now()) @db.Timestamp(6)
-  r8_locality    String?         @db.VarChar(120)
-  models         models          @relation(fields: [model_name], references: [name], map: "cars_model_name_fk")
-  versions       versions?       @relation(fields: [model_name, version_name], references: [model_name, name], map: "cars_model_version_name")
-  rn8_localities rn8_localities? @relation(fields: [r8_locality], references: [locality_name], onDelete: Restrict, map: "cars_r8_locality_fk")
+  r8_locality    String?         @db.VarChar(120) @ignore
+  models         Models          @relation(fields: [model_name], references: [name], map: "cars_model_name_fk")
+  versions       Versions?       @relation(fields: [model_name, version_name], references: [model_name, name], map: "cars_model_version_name")
+
+  userId         String?
+  user           User?           @relation( fields: [userId], references: [id], onDelete: Cascade )
+
+  @@map("cars")
 }
 
-model models {
+model Models {
   id                                   Int        @id @default(autoincrement())
   name                                 String     @unique @db.VarChar(100)
   brand                                String?    @db.VarChar(255)
-  cars                                 cars[]
-  versionsByModelId                    versions[] @relation("versions_model_idTomodels")
-  versionsByModelName                  versions[] @relation("versions_model_nameTomodels")
+  cars                                 Cars[]
+  versionsByModelId                    Versions[] @relation("versions_model_idTomodels")
+  versionsByModelName                  Versions[] @relation("versions_model_nameTomodels")
+
+  @@map("models")
 }
 
 model project_description {
@@ -50,27 +84,32 @@ model project_description {
   swagger_documentation_url String? @unique @db.VarChar(80)
 }
 
-model rn8_localities {
-  id              Int     @id @default(autoincrement())
-  province        String  @db.VarChar(80)
-  locality_name   String  @unique @db.VarChar(120)
-  normalized_name String  @db.VarChar(120)
-  is_active       Boolean @default(true)
-  cars            cars[]
 
-  @@unique([province, normalized_name])
-}
-
-model versions {
+model Versions {
   id                                 Int     @id @default(autoincrement())
   model_id                           Int
   model_name                         String  @db.VarChar(100)
   name                               String  @db.VarChar(80)
   brand                              String? @db.VarChar(255)
-  cars                               cars[]
-  modelByVersionId                   models  @relation("versions_model_idTomodels", fields: [model_id], references: [id])
-  modelByVersionName                 models  @relation("versions_model_nameTomodels", fields: [model_name], references: [name])
+  cars                               Cars[]
+  modelByVersionId                   Models  @relation("versions_model_idTomodels", fields: [model_id], references: [id])
+  modelByVersionName                 Models  @relation("versions_model_nameTomodels", fields: [model_name], references: [name])
 
   @@unique([model_id, name], map: "versions_unique_per_model_id")
   @@unique([model_name, name], map: "versions_unique_per_model_name")
+  @@map("versions")
+}
+
+
+
+model RN8Localities {
+  id              Int     @id @default(autoincrement())
+  province        String  @db.VarChar(80)
+  locality_name   String  @unique @db.VarChar(120)
+  normalized_name String  @db.VarChar(120)
+  is_active       Boolean @default(true)
+
+  @@unique([province, normalized_name])
+  @@map("rn8_localities")
+  @@ignore
 }
