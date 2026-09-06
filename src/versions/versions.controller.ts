@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { VersionsService } from './versions.service';
 import { CreateVersionDto } from './dto/create-version.dto';
 import { UpdateVersionDto } from './dto/update-version.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller({path: 'versions', version: '1'})
 export class VersionsController {
@@ -12,9 +13,26 @@ export class VersionsController {
     return this.versionsService.create(createVersionDto);
   }
 
+  
+  
   @Get()
+  async findWithPagination( @Query() pagination : PaginationQueryDto ) {
+    
+    return await this.versionsService.findWithPagination( pagination.page, pagination.pageSize )
+    
+  }
+  
+  @Get('all')
   findAll() {
     return this.versionsService.findAll();
+  }
+  
+
+  @Get('count')
+  async findAllVersionsWithCarsCounter() {
+
+    return await this.versionsService.findAllVersionsWithCarsCounter()
+
   }
 
 

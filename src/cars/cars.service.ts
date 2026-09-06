@@ -1,19 +1,72 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { carRowT, carT, createCarInputI } from './types/car.types';
+import { carRowT, carT, carVerificationT, createCarInputI } from './types/car.types';
 
 @Injectable()
 export class CarsService {
 
-  constructor(
-    private readonly prismaORM : PrismaService
-  ) {}
+  constructor(private readonly prismaORM : PrismaService ) {}
 
 
   async create(createCarDto: CreateCarDto) {
     
+    const existingCar = await this.prismaORM.cars.findFirst({
+      where: createCarDto as carVerificationT,
+    })
+
+    if (existingCar) {
+
+      return this.prismaORM.cars.update(
+        {
+          where: {id: existingCar.id},
+          
+          data: {quantity: {increment: 1} },
+          
+          select: {brand: true, model_name: true, version_name: true, quantity: true}
+        }
+      )
+    }
+  
+    
+    const modelAvailable = await this.prismaORM.models.findUnique( {
+      where: {name: createCarDto.model_name}
+    } )
+
+    if( !modelAvailable ) {
+
+      let errors : string[] = [] ;
+
+      errors.push( "The car model is not registered or available" )
+
+      throw new NotFoundException( errors ) 
+
+    }
+
+
+    const versionAvailable = await this.prismaORM.versions.findUnique(
+      {
+        where: {
+          model_name_name: {
+            model_name: createCarDto.model_name,
+            name: createCarDto.version_name
+          }
+        }
+      }
+    )
+
+    if( !versionAvailable ) {
+
+      let errors : string[] = [] ;
+
+      errors.push( "The car version is not registered or available" )
+
+      throw new NotFoundException( errors ) 
+
+    }
+
+
     return this.prismaORM.cars.create(
       {
         data: createCarDto,
@@ -28,6 +81,20 @@ export class CarsService {
     return await this.prismaORM.cars.findMany() ;
   }
 
+
+  async findWithPagination( page : number, pageSize : number ) {
+
+    return await this.prismaORM.cars.findMany(
+      {
+        skip: (page - 1) * pageSize,
+        
+        take: pageSize,
+
+        orderBy: {id: 'asc'}
+      }
+    )
+
+  }
 
   async findOneById(id: number) {
     
@@ -133,15 +200,94 @@ export class CarsService {
   }
 
 
-  update(id: number, updateCarDto: UpdateCarDto) {
-    return `This action updates a #${id} car`;
+  async update(id: number, updateCarDto: UpdateCarDto) {
+
+    const existingCar = await this.prismaORM.cars.findFirst({
+      where: updateCarDto as carVerificationT,
+    })
+
+    if (existingCar) {
+
+      return this.prismaORM.cars.update(
+        {
+          where: {id: existingCar.id},
+          
+          data: {quantity: {increment: 1} },
+          
+          select: {brand: true, model_name: true, version_name: true, quantity: true}
+        }
+      )
+    }
+  
+    
+    const modelAvailable = await this.prismaORM.models.findUnique( {
+      where: {name: updateCarDto.model_name}
+    } )
+
+    if( !modelAvailable ) {
+
+      let errors : string[] = [] ;
+
+      errors.push( "The car model is not registered or available" )
+
+      throw new NotFoundException( errors ) 
+
+    }
+
+
+    const versionAvailable = await this.prismaORM.versions.findUnique(
+      {
+        where: {
+          model_name_name: {
+            model_name: updateCarDto.model_name!,
+            name: updateCarDto.version_name!
+          }
+        }
+      }
+    )
+
+    if( !versionAvailable ) {
+
+      let errors : string[] = [] ;
+
+      errors.push( "The car version is not registered or available" )
+
+      throw new NotFoundException( errors ) 
+
+    }
+
+
+    return this.prismaORM.cars.update(
+      {
+        where: {id},
+        data: updateCarDto
+      }
+    )
+    
   }
 
 
   remove(id: number) {
-    return `This action removes a #${id} car`;
+    return this.prismaORM.cars.delete(
+      {
+        where: {id}
+      }
+    )
   }
 
+  
+  removeCarsWithOutStock( version : string ) {
+
+    return this.prismaORM.cars.deleteMany(
+      {
+        where: {
+          version_name: version ,
+          quantity: 0
+        }
+      }
+    )
+
+  }
 
 }
 
