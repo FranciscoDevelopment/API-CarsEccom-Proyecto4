@@ -5,9 +5,10 @@ import { CarsModule } from './cars/cars.module';
 import { ModelsModule } from './models/models.module';
 import { VersionsModule } from './versions/versions.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [PrismaModule, CarsModule, ModelsModule, VersionsModule],
+  imports: [PrismaModule, CarsModule, ModelsModule, VersionsModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })
