@@ -2,9 +2,18 @@ export type userRowT = {
 
     email : string ;
     
-    password : string ;
+    password? : string ;
 
-    name : string
+    name : string ;
+
+    role : string ;
+    
+    createdAt : Date ;
+    
+    updatedAt : Date
+    
+    hashedRefreshToken? : string | null;
+    
 
 }
 
