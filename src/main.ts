@@ -13,6 +13,8 @@ async function bootstrap() {
 
   app.setGlobalPrefix( "api" ) ; // localhost:PORT/api
 
+  //app.use( helmet() )
+
   app.enableVersioning( {type: VersioningType.URI, defaultVersion: '1'} ); // localhost:PORT/api/v1 => API REST | o por ej localhost:PORT/api/v2 => API GraphQL
 
   app.useGlobalPipes(
