@@ -13,7 +13,6 @@ export type userRowT = {
     updatedAt : Date
     
     hashedRefreshToken? : string | null;
-    
 
 }
 

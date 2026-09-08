@@ -6,6 +6,7 @@ import { Auth } from 'src/auth/decorators/auth.decorator';
 import { RoleEnum } from 'src/auth/types/role.type';
 import { UserEntity } from './entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import type { JwtPayloadT } from 'src/auth/types/jwt.types';
 
 @Controller('users')
 export class UsersController {
@@ -44,16 +45,24 @@ export class UsersController {
     return new UserEntity( await this.usersService.findOne( id ) )
   }
 
-  
+
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+  async update(
+    @Param('id') id: string, 
+    @Body() updateUserDto: UpdateUserDto, 
+    @CurrentUser() user : JwtPayloadT 
+  ) {
+
+    return new UserEntity( await this.usersService.update( id, updateUserDto, user ) )
   }
 
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  @Auth( RoleEnum.ADMIN )
+  async remove( @Param('id', ParseUUIDPipe) id : string ) {
+
+    return new UserEntity( await this.usersService.remove(id) ) 
+
   }
 
 
