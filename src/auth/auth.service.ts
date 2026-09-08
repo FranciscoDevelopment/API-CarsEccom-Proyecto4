@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { UsersService } from 'src/users/users.service';
@@ -45,7 +45,7 @@ export class AuthService {
 
     const passwordChecking = await checkTheRespectivePassword( loginDto.password, user.password );
 
-    if( !passwordChecking ) throw new UnauthorizedException('Invalid credentials');
+    if  ( !passwordChecking ) throw new UnauthorizedException('Invalid credentials');
 
 
     const tokens = await this.generateTokens( user.id, user.email, user.role )
@@ -57,6 +57,33 @@ export class AuthService {
 
   }
   
+
+  async refresh( userId : string, refreshToken : string ) {
+
+    const user = await this.usersService.findByIdWithRefreshToken( userId )
+
+    if( !user?.hashedRefreshToken ) throw new ForbiddenException('Access denied') ;
+
+
+    const coincide = await checkTheRespectivePassword( this.resume(refreshToken), user.hashedRefreshToken ) ;
+
+    if( !coincide ) {
+
+      await this.usersService.updateRefreshToken( user.id, null ) ;
+    
+      throw new ForbiddenException('Access denied') ;
+    }
+
+
+    return this.generateTokens( user.id, user.email, user.role )
+
+  }
+
+
+  async logout( userId : string ) {
+    await this.usersService.updateRefreshToken( userId, null )
+  }
+
   
   private async generateTokens ( userId : string, email : string, role : string ) {
 
