@@ -9,7 +9,7 @@ import { RoleEnum } from 'src/auth/types/role.type';
 
 
 const SELECT_PUBLIC = {
-  //id: true,
+  id: true,
   email: true,
   name: true,
   role: true,
