@@ -1,34 +1,54 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, HttpCode, HttpStatus, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Public } from './decorators/public.decorator';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { RefreshTokenGuard } from './guards/refresh-token/refresh-token.guard';
+import { LoginDto } from './dto/login.dto';
+import { JwtPayloadT } from './types/jwt.types';
+import { CurrentUser } from './decorators/current-user.decorator';
 
-@Controller('auth')
+@Controller({path: 'auth', version: '1'})
 export class AuthController {
+  
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  @Public()
+  @Post('register')
+  async register( @Body() registerUserDto : CreateUserDto ) {
+
+    return await this.authService.register(registerUserDto)
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+
+  @Public()
+  @Post('login')
+  @HttpCode( HttpStatus.OK )
+  async login( @Body() loginUserDto : LoginDto ) {
+    return await this.authService.login(loginUserDto)
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+
+  @Public()
+  @UseGuards( RefreshTokenGuard )
+  @Post( 'refresh' )
+  @HttpCode( HttpStatus.OK )
+  async refresh( @Req() req : Request ) {
+    
+    const user = req['user'] as JwtPayloadT ;
+
+    const refreshToken = req['refreshToken'] as string ;
+
+
+    return await this.authService.refresh( user.sub, refreshToken )
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
+
+  @Post('logout')
+  @HttpCode( HttpStatus.NO_CONTENT )
+  async logout( @CurrentUser('sub') userId : string ) {
+
+    return await this.authService.logout( userId )
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
-  }
+
 }
