@@ -126,7 +126,7 @@ export class UsersService {
 
 
   // Guarda bcrypt(refresh_token), o null para matar la sesión (logout / reuso).
-  async updateRefreshToken( userId : string, hashedRefreshToken : string ) {
+  async updateRefreshToken( userId : string, hashedRefreshToken : string | null ) {
 
     await this.prismaORM.user.update(
       {
