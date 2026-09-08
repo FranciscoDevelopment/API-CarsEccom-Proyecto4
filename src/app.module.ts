@@ -7,10 +7,13 @@ import { VersionsModule } from './versions/versions.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './auth/guards/auth/auth.guard';
+
 
 @Module({
   imports: [PrismaModule, CarsModule, ModelsModule, VersionsModule, AuthModule, UsersModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, {provide: APP_GUARD, useClass: AuthGuard}],
 })
 export class AppModule {}
