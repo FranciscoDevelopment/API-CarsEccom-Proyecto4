@@ -2,15 +2,20 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 //import ResponseInterceptor ;
+import * as dotenv from 'dotenv'
+
+dotenv.config();
 
 
 async function bootstrap() {
   
   const app = await NestFactory.create(AppModule);
 
-  app.setGlobalPrefix( "api" ) ; 
+  app.setGlobalPrefix( "api" ) ; // localhost:PORT/api
 
-  app.enableVersioning( {type: VersioningType.URI, defaultVersion: '1'} ) ;
+  //app.use( helmet() )
+
+  app.enableVersioning( {type: VersioningType.URI, defaultVersion: '1'} ); // localhost:PORT/api/v1 => API REST | o por ej localhost:PORT/api/v2 => API GraphQL
 
   app.useGlobalPipes(
     new ValidationPipe(

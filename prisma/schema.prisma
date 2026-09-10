@@ -1,0 +1,115 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+
+model User {
+
+  id                        String      @id @default(uuid())
+  email                     String      @unique
+  password                  String
+  name                      String
+  role                      Role        @default(USER)
+
+  hashedRefreshToken        String?
+
+  cars                      Cars[]
+
+  createdAt                 DateTime    @default( now() )
+  updatedAt                  DateTime    @updatedAt
+
+  @@map("users")
+}
+
+
+
+
+model Cars {
+  id             Int             @id @default(autoincrement())
+  brand          String          @db.VarChar(50)
+  model_name     String          @db.VarChar(100)
+  version_name   String?         @db.VarChar(80)
+  price          Decimal         @default(0) @db.Decimal(10, 2)
+  quantity       Int             @default(0)
+  gear_count     Int?
+  seats          Int?
+  year           Int?
+  engine         String?         @db.VarChar(20)
+  color          String?         @db.VarChar(50)
+  image_url      String?         @default("")
+  created_at     DateTime?       @default(now()) @db.Timestamp(6)
+  r8_locality    String?         @db.VarChar(120) @ignore
+  models         Models          @relation(fields: [model_name], references: [name], map: "cars_model_name_fk")
+  versions       Versions?       @relation(fields: [model_name, version_name], references: [model_name, name], map: "cars_model_version_name")
+
+  userId         String?
+  user           User?           @relation( fields: [userId], references: [id], onDelete: Cascade )
+
+  @@map("cars")
+}
+
+model Models {
+  id                                   Int        @id @default(autoincrement())
+  name                                 String     @unique @db.VarChar(100)
+  brand                                String?    @db.VarChar(255)
+  cars                                 Cars[]
+  versionsByModelId                    Versions[] @relation("versions_model_idTomodels")
+  versionsByModelName                  Versions[] @relation("versions_model_nameTomodels")
+
+  @@map("models")
+}
+
+model project_description {
+  id                        Int     @id @default(autoincrement())
+  all_around_description    String  @unique
+  backend                   String
+  frontend                  String
+  testing                   String  @db.VarChar(80)
+  url_repository            String? @unique @db.VarChar(70)
+  name                      String? @db.VarChar(70)
+  devops                    String
+  swagger_documentation_url String? @unique @db.VarChar(80)
+}
+
+
+model Versions {
+  id                                 Int     @id @default(autoincrement())
+  model_id                           Int
+  model_name                         String  @db.VarChar(100)
+  name                               String  @db.VarChar(80)
+  brand                              String? @db.VarChar(255)
+  cars                               Cars[]
+  modelByVersionId                   Models  @relation("versions_model_idTomodels", fields: [model_id], references: [id])
+  modelByVersionName                 Models  @relation("versions_model_nameTomodels", fields: [model_name], references: [name])
+
+  @@unique([model_id, name], map: "versions_unique_per_model_id")
+  @@unique([model_name, name], map: "versions_unique_per_model_name")
+  @@map("versions")
+}
+
+
+
+model RN8Localities {
+  id              Int     @id @default(autoincrement())
+  province        String  @db.VarChar(80)
+  locality_name   String  @unique @db.VarChar(120)
+  normalized_name String  @db.VarChar(120)
+  is_active       Boolean @default(true)
+
+  @@unique([province, normalized_name])
+  @@map("rn8_localities")
+  @@ignore
+}
