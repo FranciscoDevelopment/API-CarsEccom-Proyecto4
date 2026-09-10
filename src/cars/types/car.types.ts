@@ -40,4 +40,4 @@ export type carT = Omit< carRowT, "created_at" | "image_url" > & {
 }
 
 
-export type carVerificationT = Pick<carT, 'brand' | 'model_name' | 'version_name' | 'color' | 'engine' | 'gear_count' | 'year' > ;
+export type carVerificationT = Partial<Pick<carT, 'brand' | 'model_name' | 'version_name' | 'color' | 'engine' | 'gear_count' | 'year'>>;

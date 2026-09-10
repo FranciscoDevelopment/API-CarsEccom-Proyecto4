@@ -4,6 +4,8 @@ import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
 import { ApiKeyGuard } from 'src/common/guards/api-key/api-key.guard';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { Auth } from 'src/auth/decorators/auth.decorator';
+import { RoleEnum } from 'src/auth/types/role.type';
 
 
 @Controller( {path: 'cars', version: '1' } )
@@ -11,6 +13,7 @@ export class CarsController {
 
   constructor(private readonly carsService: CarsService) {}
 
+  @Auth(RoleEnum.ADMIN)
   @Post()
   //@UseGuards( ApiKeyGuard )
   async create(@Body() createCarDto: CreateCarDto) {
@@ -80,16 +83,21 @@ export class CarsController {
   }
 
 
+  @Auth( RoleEnum.ADMIN )
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCarDto: UpdateCarDto) {
     return this.carsService.update(+id, updateCarDto);
   }
 
+
+  @Auth( RoleEnum.ADMIN )
   @Delete('version/:version')
   removeCarsWithOutStock( @Param('version') version : string ) {
     return this.carsService.removeCarsWithOutStock(version)
   }
 
+
+  @Auth( RoleEnum.ADMIN )
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.carsService.remove(+id);
