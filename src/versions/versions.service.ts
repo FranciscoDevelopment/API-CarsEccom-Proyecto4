@@ -2,8 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { CreateVersionDto } from './dto/create-version.dto';
 import { UpdateVersionDto } from './dto/update-version.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { version } from 'node:os';
-import { versionRowT, versionVerificationT } from './types/version.type';
+import { versionVerificationT } from './types/version.type';
 
 @Injectable()
 export class VersionsService {
@@ -133,107 +132,52 @@ export class VersionsService {
 
     const errors : string[] = []
 
-    
-    const existingVersion = await this.prismaORM.versions.findFirst(
-      {
-        where: updateVersionDto as versionVerificationT
+
+    if( updateVersionDto.model_name ){
+
+      const modelAvailable = await this.prismaORM.models.findUnique(
+        {
+          where: {name: updateVersionDto.model_name}
+        }
+      )
+
+      if( !modelAvailable ) {
+
+        errors.push( 'The car model is not registered or available' )
+
+        throw new NotFoundException( errors )
+
       }
-    )
 
-    if( existingVersion ) {
-      let errors: string[] = [];
 
-      errors.push(`Version "${updateVersionDto.name}" already exists for model "${updateVersionDto.model_name}"`);
+      if (updateVersionDto.model_name && updateVersionDto.name) {
 
-      throw new ConflictException(errors);
+        const duplicateVersion = await this.prismaORM.versions.findUnique({
+          where: {
+            model_name_name: {
+              model_name: updateVersionDto.model_name,
+              name: updateVersionDto.name,
+            }
+          }
+        });
+
+        if (duplicateVersion && duplicateVersion.id !== id) {
+          
+          errors.push(`Version "${updateVersionDto.name}" already exists for model "${updateVersionDto.model_name}"`)
+
+          throw new ConflictException( errors );
+        }
+      }
+
     }
 
 
-    const modelAvailable = await this.prismaORM.models.findUnique( {
-      where: {name: updateVersionDto.model_name}
-    } )
-
-    if( !modelAvailable ) {
-
-      let errors : string[] = [] ;
-
-      errors.push( "The car model is not registered or available" )
-
-      throw new NotFoundException( errors ) 
-
-    }
-
-
-    const transaction$ = this.prismaORM.$transaction( async (tx) => {
-
-      const version = await tx.versions.findFirstOrThrow(
+      return this.prismaORM.versions.update(
         {
-          where: {id}
+          where: { id },
+          data: updateVersionDto,
         }
-      )
-      
-
-      const carsCount = await tx.cars.count(
-        {
-          where: {
-            model_name: version.model_name,
-            version_name: version.name
-          }
-        }
-      )
-
-      if( carsCount > 1 ) {
-
-        errors.push(`Version '${version.name}' has more than 1 unit in stock and can't be deleted directly` )
-
-        throw new ConflictException( errors )
-
-      }
-
-
-      const stock = await tx.cars.aggregate(
-        {
-          where: {
-            model_name: version.model_name,
-            version_name: version.name
-          },
-          _sum: {quantity: true}
-        }
-      )
-
-      const totalUnits = stock._sum.quantity ?? 0 ;
-
-      if( totalUnits > 1 ){
-
-        errors.push(  `Version '${version.name}' has more than 1 unit in stock and can't be deleted` )
-
-        throw new ConflictException( errors )
-
-      }
-
-
-      await tx.cars.deleteMany(
-        {
-          where: {
-            model_name: version.model_name,
-            version_name: version.name,
-          }
-        }
-      )
-
-
-      return tx.versions.update(
-        {
-          where: {id},
-          data: updateVersionDto
-        }
-      )
-
-    } )
-
-
-    return transaction$
-
+      );
 
   }
 
