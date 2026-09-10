@@ -201,10 +201,21 @@ export class CarsService {
 
 
   async update(id: number, updateCarDto: UpdateCarDto) {
+    
+    const verificationData : carVerificationT = {
+      brand: updateCarDto.brand,
+      model_name: updateCarDto.model_name,
+      version_name: updateCarDto.version_name,
+      color: updateCarDto.color,
+      engine: updateCarDto.engine,
+      gear_count: updateCarDto.gear_count,
+      year: updateCarDto.year,
+    };
 
     const existingCar = await this.prismaORM.cars.findFirst({
-      where: updateCarDto as carVerificationT,
-    })
+      where: verificationData,
+    });
+
 
     if (existingCar) {
 
@@ -212,47 +223,54 @@ export class CarsService {
         {
           where: {id: existingCar.id},
           
-          data: {quantity: {increment: 1} },
+          data: updateCarDto,
           
           select: {brand: true, model_name: true, version_name: true, quantity: true}
         }
       )
     }
   
-    
-    const modelAvailable = await this.prismaORM.models.findUnique( {
-      where: {name: updateCarDto.model_name}
-    } )
+    if( updateCarDto.model_name ) {
 
-    if( !modelAvailable ) {
+      const modelAvailable = await this.prismaORM.models.findUnique( {
+        where: {name: updateCarDto.model_name}
+      } )
 
-      let errors : string[] = [] ;
+      if( !modelAvailable ) {
 
-      errors.push( "The car model is not registered or available" )
+        let errors : string[] = [] ;
 
-      throw new NotFoundException( errors ) 
+        errors.push( "The car model is not registered or available" )
+
+        throw new NotFoundException( errors ) 
+
+      }
 
     }
 
 
-    const versionAvailable = await this.prismaORM.versions.findUnique(
-      {
-        where: {
-          model_name_name: {
-            model_name: updateCarDto.model_name!,
-            name: updateCarDto.version_name!
+    if( updateCarDto.model_name && updateCarDto.version_name ) {
+
+      const versionAvailable = await this.prismaORM.versions.findUnique(
+        {
+          where: {
+            model_name_name: {
+              model_name: updateCarDto.model_name!,
+              name: updateCarDto.version_name!
+            }
           }
         }
+      )
+  
+      if( !versionAvailable ) {
+  
+        let errors : string[] = [] ;
+  
+        errors.push( "The car version is not registered or available" )
+  
+        throw new NotFoundException( errors ) 
+  
       }
-    )
-
-    if( !versionAvailable ) {
-
-      let errors : string[] = [] ;
-
-      errors.push( "The car version is not registered or available" )
-
-      throw new NotFoundException( errors ) 
 
     }
 
