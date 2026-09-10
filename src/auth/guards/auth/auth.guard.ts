@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
 import { Request} from 'express'
 import { JwtPayloadT } from 'src/auth/types/jwt.types';
+import { IS_PUBLIC_KEY } from 'src/auth/decorators/public.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -18,7 +19,7 @@ export class AuthGuard implements CanActivate {
 
   async canActivate( context : ExecutionContext ) {
 
-    const isPublic = this.reflector.getAllAndOverride<boolean>( 'IS_PUBLIC_KEY', [
+    const isPublic = this.reflector.getAllAndOverride<boolean>( IS_PUBLIC_KEY, [
 
       context.getHandler() ,
       context.getClass()
@@ -48,7 +49,7 @@ export class AuthGuard implements CanActivate {
 
     } 
     catch {
-      throw new UnauthorizedException('Invalid or expired Token \n')
+      throw new UnauthorizedException('Invalid or expired Token')
     }
 
 

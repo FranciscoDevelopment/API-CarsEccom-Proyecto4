@@ -2,12 +2,15 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ModelsService } from './models.service';
 import { CreateModelDto } from './dto/create-model.dto';
 import { UpdateModelDto } from './dto/update-model.dto';
+import { Auth } from 'src/auth/decorators/auth.decorator';
+import { RoleEnum } from 'src/auth/types/role.type';
 
 @Controller({path: 'models', version: '1'})
 export class ModelsController {
 
   constructor(private readonly modelsService: ModelsService) {}
 
+  @Auth(RoleEnum.ADMIN)
   @Post()
   create(@Body() createModelDto: CreateModelDto) {
     return this.modelsService.create(createModelDto);
@@ -34,12 +37,14 @@ export class ModelsController {
   }
 
 
+  @Auth( RoleEnum.ADMIN )
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateModelDto: UpdateModelDto) {
     return await this.modelsService.update(+id, updateModelDto);
   }
 
 
+  @Auth( RoleEnum.ADMIN )
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return await this.modelsService.remove(+id);

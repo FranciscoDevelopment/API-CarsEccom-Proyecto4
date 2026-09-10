@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, HttpCode, HttpStatus, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, HttpCode, HttpStatus, Req, UseInterceptors, ClassSerializerInterceptor } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
@@ -7,6 +7,7 @@ import { LoginDto } from './dto/login.dto';
 import { JwtPayloadT } from './types/jwt.types';
 import { CurrentUser } from './decorators/current-user.decorator';
 
+@UseInterceptors( ClassSerializerInterceptor )
 @Controller({path: 'auth', version: '1'})
 export class AuthController {
   

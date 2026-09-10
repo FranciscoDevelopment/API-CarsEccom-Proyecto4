@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, UseInterceptors, ClassSerializerInterceptor } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -8,6 +8,7 @@ import { UserEntity } from './entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import type { JwtPayloadT } from 'src/auth/types/jwt.types';
 
+@UseInterceptors( ClassSerializerInterceptor )
 @Controller('users')
 export class UsersController {
   
@@ -47,6 +48,7 @@ export class UsersController {
 
 
   @Patch(':id')
+  @Auth( RoleEnum.ADMIN )
   async update(
     @Param('id') id: string, 
     @Body() updateUserDto: UpdateUserDto, 
