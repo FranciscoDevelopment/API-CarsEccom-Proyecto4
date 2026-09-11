@@ -201,35 +201,7 @@ export class CarsService {
 
 
   async update(id: number, updateCarDto: UpdateCarDto) {
-    
-    const verificationData : carVerificationT = {
-      brand: updateCarDto.brand,
-      model_name: updateCarDto.model_name,
-      version_name: updateCarDto.version_name,
-      color: updateCarDto.color,
-      engine: updateCarDto.engine,
-      gear_count: updateCarDto.gear_count,
-      year: updateCarDto.year,
-    };
 
-    const existingCar = await this.prismaORM.cars.findFirst({
-      where: verificationData,
-    });
-
-
-    if (existingCar) {
-
-      return this.prismaORM.cars.update(
-        {
-          where: {id: existingCar.id},
-          
-          data: updateCarDto,
-          
-          select: {brand: true, model_name: true, version_name: true, quantity: true}
-        }
-      )
-    }
-  
     if( updateCarDto.model_name ) {
 
       const modelAvailable = await this.prismaORM.models.findUnique( {
